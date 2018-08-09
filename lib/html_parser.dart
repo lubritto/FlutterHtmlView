@@ -1,18 +1,20 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_html_view/flutter_html_video.dart';
+import 'package:flutter_youtube/flutter_youtube.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parse;
 import 'package:flutter_html_view/flutter_html_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:video_player/video_player.dart';
 
 class HtmlParser {
   HtmlParser();
 
   _parseChildren(e, widgetList) {
     print(e);
-    if (e.localName == "img" && e.attributes.containsKey('src')) {
+    if (e is dom.Text) {
+      widgetList.add(new HtmlText(data: e.text));
+    } else if (e.localName == "img" && e.attributes.containsKey('src')) {
       var src = e.attributes['src'];
 
       if (src.startsWith("http") || src.startsWith("https")) {
@@ -28,14 +30,38 @@ class HtmlParser {
         widgetList.add(new Image.memory(bytes, fit: BoxFit.cover));
       }
     } else if (e.localName == "video" && e.attributes.containsKey('src')) {
-      var src = e.attributes['src'];
-      // var videoElements = e.getElementsByTagName("video");
+      String src = e.attributes['src'] as String;
+
+      String id = src.split("=")[1];
+
       widgetList.add(
-        new NetworkPlayerLifeCycle(
-          src,
-          (BuildContext context, VideoPlayerController controller) =>
-              new AspectRatioVideo(controller),
-        ),
+        GestureDetector(
+          onTap: () {
+            FlutterYoutube.playYoutubeVideoByUrl(
+              apiKey: "AIzaSyAjbTYanVPDH7fR9mM5cE5PkA9c789kbEE",
+              videoUrl: "https://www.youtube.com/watch?v=id",
+            );
+          },
+          child: Stack(
+            alignment: Alignment.center,
+            children: <Widget>[
+              CachedNetworkImage(
+                imageUrl: 'https://img.youtube.com/vi/$id/0.jpg',
+                fit: BoxFit.cover,
+              ),
+              Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  width: 70.0,
+                  child: CachedNetworkImage(
+                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/YouTube_play_buttom_icon_%282013-2017%29.svg/1280px-YouTube_play_buttom_icon_%282013-2017%29.svg.png',
+                    fit: BoxFit.cover,
+                  ),
+                )
+              )
+            ],
+          )
+        )
       );
     } else if (!e.outerHtml.contains("<img") ||
         !e.outerHtml.contains("<video") ||
