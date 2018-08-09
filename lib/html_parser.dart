@@ -10,6 +10,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 class HtmlParser {
   HtmlParser();
 
+  String _apiKey;
+
   _parseChildren(e, widgetList) {
     print(e);
     if (e is dom.Text) {
@@ -38,7 +40,7 @@ class HtmlParser {
         GestureDetector(
           onTap: () {
             FlutterYoutube.playYoutubeVideoByUrl(
-              apiKey: "AIzaSyAjbTYanVPDH7fR9mM5cE5PkA9c789kbEE",
+              apiKey: _apiKey,
               videoUrl: "https://www.youtube.com/watch?v=id",
             );
           },
@@ -74,7 +76,9 @@ class HtmlParser {
       e.children.forEach((e) => _parseChildren(e, widgetList));
   }
 
-  List<Widget> HParse(String html) {
+  List<Widget> HParse(String html, String apiKey) {
+    _apiKey = apiKey;
+
     List<Widget> widgetList = new List();
 
     dom.Document document = parse(html);
