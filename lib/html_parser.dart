@@ -42,10 +42,10 @@ class HtmlParser {
 
         widgetList.add(new Image.memory(bytes, fit: BoxFit.cover));
       }
-    } else if (e.localName == "video" && e.attributes.containsKey('src')) {
+    } else if (e.localName == "iframe" && e.attributes.containsKey('src')) {
       String src = e.attributes['src'] as String;
 
-      String id = src.split("=")[1];
+      String id = src.split("/embed/")[1];
 
       widgetList.add(
         GestureDetector(
@@ -77,15 +77,15 @@ class HtmlParser {
           )
         )
       );
-    } else if (!e.outerHtml.contains("<img") ||
-        !e.outerHtml.contains("<video") ||
+    } else if (e.localName != "div" && !e.outerHtml.contains("<img") &&
+        !e.outerHtml.contains("<video") &&
         !e.hasContent()) {
       print(e.outerHtml);
       widgetList.add(new HtmlText(data: e.outerHtml));
     }
 
-    if (e.children.length > 0)
-      e.children.forEach((e) => _parseChildren(e, widgetList));
+    if (e.nodes.length > 0)
+      e.nodes.forEach((e) => _parseChildren(e, widgetList));
   }
 
   List<Widget> HParse(String html, String apiKey) {
