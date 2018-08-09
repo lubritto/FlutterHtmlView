@@ -12,6 +12,17 @@ class HtmlParser {
 
   String _apiKey;
 
+  Widget _buildPlaceholder() => Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        new LimitedBox(
+            maxHeight: 90.0,
+            maxWidth: 90.0,
+            child: CircularProgressIndicator()
+        ),
+      ],
+    );
+
   _parseChildren(e, widgetList) {
     print(e);
     if (e is dom.Text) {
@@ -41,7 +52,7 @@ class HtmlParser {
           onTap: () {
             FlutterYoutube.playYoutubeVideoByUrl(
               apiKey: _apiKey,
-              videoUrl: "https://www.youtube.com/watch?v=id",
+              videoUrl: "https://www.youtube.com/watch?v=$id",
             );
           },
           child: Stack(
@@ -50,6 +61,7 @@ class HtmlParser {
               CachedNetworkImage(
                 imageUrl: 'https://img.youtube.com/vi/$id/0.jpg',
                 fit: BoxFit.cover,
+                placeholder: _buildPlaceholder(),
               ),
               Center(
                 child: Container(
