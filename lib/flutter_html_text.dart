@@ -417,7 +417,7 @@ class HtmlParser {
     String value;
 
     double fontSize = 0.0;
-    Color color = new Color(0xFF000000);
+    Color color = new Color(0xFF484848);
     FontWeight fontWeight = FontWeight.normal;
     FontStyle fontStyle = FontStyle.normal;
     TextDecoration textDecoration = TextDecoration.none;
@@ -434,6 +434,7 @@ class HtmlParser {
         break;
       case 'h4':
         fontSize = 16.0;
+        fontWeight = FontWeight.w600;
         break;
       case 'h5':
         fontSize = 12.8;
@@ -507,12 +508,14 @@ class HtmlParser {
           fontWeight: fontWeight,
           fontStyle: fontStyle,
           decoration: textDecoration,
+          height: 1.5,
           fontSize: fontSize);
     } else {
       textStyle = new TextStyle(
         color: color,
         fontWeight: fontWeight,
         fontStyle: fontStyle,
+        height: 1.5,
         decoration: textDecoration,
       );
     }

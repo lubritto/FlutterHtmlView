@@ -25,22 +25,42 @@ class HtmlParser {
 
   _parseChildren(e, widgetList) {
     print(e);
-    if (e is dom.Text) {
-      widgetList.add(new HtmlText(data: e.text));
+
+    if (e is String || e is dom.Text){
+
+      String old = e.text;
+
+      var newElement = dom.Element.tag('p')
+        ..text = old;
+
+      widgetList.add(
+          Padding(
+            padding: EdgeInsets.only(bottom: 0.0),
+              child: HtmlText(
+                  data: newElement.outerHtml)));
+      return;
+    } else if (!e.outerHtml.contains("<img") &&
+        !e.outerHtml.contains("<iframe")) {
+      print(e.outerHtml);
+      widgetList.add(
+          Padding(
+              padding: EdgeInsets.only(bottom: 0.0),
+              child: HtmlText(data: e.outerHtml)));
+      return;
     } else if (e.localName == "img" && e.attributes.containsKey('src')) {
       var src = e.attributes['src'];
 
       if (src.startsWith("http") || src.startsWith("https")) {
-        widgetList.add(new CachedNetworkImage(
+        widgetList.add(CachedNetworkImage(
           imageUrl: src,
           fit: BoxFit.cover,
         ));
       } else if (src.startsWith('data:image')) {
-        var exp = new RegExp(r'data:.*;base64,');
+        var exp = RegExp(r'data:.*;base64,');
         var base64Str = src.replaceAll(exp, '');
         var bytes = base64.decode(base64Str);
 
-        widgetList.add(new Image.memory(bytes, fit: BoxFit.cover));
+        widgetList.add(Image.memory(bytes, fit: BoxFit.cover));
       }
     } else if (e.localName == "iframe" && e.attributes.containsKey('src')) {
       String src = e.attributes['src'] as String;
@@ -77,11 +97,6 @@ class HtmlParser {
           )
         )
       );
-    } else if (e.localName != "div" && !e.outerHtml.contains("<img") &&
-        !e.outerHtml.contains("<video") &&
-        !e.hasContent()) {
-      print(e.outerHtml);
-      widgetList.add(new HtmlText(data: e.outerHtml));
     }
 
     if (e.nodes.length > 0)
@@ -110,10 +125,12 @@ class HtmlParser {
       }
     }
 
-    List<dom.Element> docBodyChildren = docBody.children;
+    List<dom.Node> docBodyChildren = docBody.nodes;
+
     if (docBodyChildren.length > 0)
       docBodyChildren.forEach((e) => _parseChildren(e, widgetList));
 
     return widgetList;
   }
 }
+
