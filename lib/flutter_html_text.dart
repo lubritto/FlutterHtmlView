@@ -31,14 +31,14 @@ class HtmlText extends StatelessWidget {
     if (await canLaunch(url)) {
       await launch(url);
     } else {
-      throw 'Could not launch $url';
+      print('Could not launch $url');
     }
   }
 
   TapGestureRecognizer recognizer(String url) {
     return new TapGestureRecognizer()
       ..onTap = () {
-        if (url.startsWith("http:") || url.startsWith("https:")) {
+        if (url.startsWith("http://") || url.startsWith("https://")) {
           _launchURL(url);
         } else {
           _launchOtherURL(url);
@@ -49,8 +49,9 @@ class HtmlText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ctx = context;
-    HtmlParser parser = new HtmlParser();
+    HtmlParser parser = new HtmlParser(context);
     List nodes = parser.parse(this.data);
+
     TextSpan span = this._stackToTextSpan(nodes, context);
     RichText contents = new RichText(
       text: span,
@@ -79,8 +80,13 @@ class HtmlText extends StatelessWidget {
   TextSpan _textSpan(Map node) {
     TextSpan span;
     String s = node['text'];
+
     s = s.replaceAll('\u00A0', ' ');
     s = s.replaceAll('&nbsp;', ' ');
+    s = s.replaceAll('&amp;', '&');
+    s = s.replaceAll('&lt;', '<');
+    s = s.replaceAll('&gt;', '>');
+
     if (node['tag'] == 'a') {
       span = new TextSpan(
           text: s, style: node['style'], recognizer: recognizer(node['href']));
@@ -102,6 +108,8 @@ class HtmlParser {
   RegExp _attr;
   RegExp _style;
   RegExp _color;
+
+  final BuildContext context;
 
   final List _emptyTags = const [
     'area',
@@ -234,7 +242,7 @@ class HtmlParser {
 
   Map<String, dynamic> _tag;
 
-  HtmlParser() {
+  HtmlParser(this.context) {
     this._startTag = new RegExp(
         r'^<([-A-Za-z0-9_]+)((?:\s+[-\w]+(?:\s*=\s*(?:(?:"[^"]*")' +
             "|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>");
@@ -416,11 +424,13 @@ class HtmlParser {
     String param;
     String value;
 
-    double fontSize = 0.0;
-    Color color = new Color(0xFF484848);
-    FontWeight fontWeight = FontWeight.normal;
-    FontStyle fontStyle = FontStyle.normal;
-    TextDecoration textDecoration = TextDecoration.none;
+    TextStyle defaultTextStyle = DefaultTextStyle.of(context).style;
+
+    double fontSize = defaultTextStyle.fontSize;
+    Color color = defaultTextStyle.color;
+    FontWeight fontWeight = defaultTextStyle.fontWeight;
+    FontStyle fontStyle = defaultTextStyle.fontStyle;
+    TextDecoration textDecoration = defaultTextStyle.decoration;
 
     switch (tag) {
       case 'h1':

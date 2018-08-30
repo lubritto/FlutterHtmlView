@@ -13,39 +13,33 @@ class HtmlParser {
   String _apiKey;
 
   Widget _buildPlaceholder() => Stack(
-      alignment: Alignment.center,
-      children: <Widget>[
-        new LimitedBox(
-            maxHeight: 90.0,
-            maxWidth: 90.0,
-            child: CircularProgressIndicator()
-        ),
-      ],
-    );
+        alignment: Alignment.center,
+        children: <Widget>[
+          new LimitedBox(
+              maxHeight: 90.0,
+              maxWidth: 90.0,
+              child: CircularProgressIndicator()),
+        ],
+      );
 
-  _parseChildren(e, widgetList) {
+  _parseChildren(dom.Element e, widgetList) {
     print(e);
 
-    if (e is String || e is dom.Text){
-
+    if (e is String || e is dom.Text) {
       String old = e.text;
 
-      var newElement = dom.Element.tag('p')
-        ..text = old;
+      var newElement = dom.Element.tag('p')..text = old;
 
-      widgetList.add(
-          Padding(
-            padding: EdgeInsets.only(bottom: 0.0),
-              child: HtmlText(
-                  data: newElement.outerHtml)));
+      widgetList.add(Padding(
+          padding: EdgeInsets.only(bottom: 0.0),
+          child: HtmlText(data: newElement.outerHtml)));
       return;
     } else if (!e.outerHtml.contains("<img") &&
         !e.outerHtml.contains("<iframe")) {
       print(e.outerHtml);
-      widgetList.add(
-          Padding(
-              padding: EdgeInsets.only(bottom: 0.0),
-              child: HtmlText(data: e.outerHtml)));
+      widgetList.add(Padding(
+          padding: EdgeInsets.only(bottom: 0.0),
+          child: HtmlText(data: e.outerHtml)));
       return;
     } else if (e.localName == "img" && e.attributes.containsKey('src')) {
       var src = e.attributes['src'];
@@ -67,8 +61,7 @@ class HtmlParser {
 
       String id = src.split("/embed/")[1];
 
-      widgetList.add(
-        GestureDetector(
+      widgetList.add(GestureDetector(
           onTap: () {
             FlutterYoutube.playYoutubeVideoByUrl(
               apiKey: _apiKey,
@@ -84,23 +77,53 @@ class HtmlParser {
                 placeholder: _buildPlaceholder(),
               ),
               Center(
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 70.0,
-                  child: CachedNetworkImage(
-                    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/YouTube_play_buttom_icon_%282013-2017%29.svg/1280px-YouTube_play_buttom_icon_%282013-2017%29.svg.png',
-                    fit: BoxFit.cover,
-                  ),
-                )
-              )
+                  child: Container(
+                alignment: Alignment.center,
+                width: 70.0,
+                child: CachedNetworkImage(
+                  imageUrl:
+                      'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/YouTube_play_buttom_icon_%282013-2017%29.svg/1280px-YouTube_play_buttom_icon_%282013-2017%29.svg.png',
+                  fit: BoxFit.cover,
+                ),
+              ))
             ],
-          )
-        )
-      );
-    }
+          )));
+    } else if (e.localName == "video") {
+      if (e.attributes.containsKey('src')) {
+        var src = e.attributes['src'];
+        // var videoElements = e.getElementsByTagName("video");
+        widgetList.add(
+          new NetworkPlayerLifeCycle(
+            src,
+            (BuildContext context, VideoPlayerController controller) =>
+                new AspectRatioVideo(controller),
+          ),
+        );
+      } else {
+        if (e.children.length > 0) {
+          e.children.forEach((dom.Element source) {
+            try {
+              if (source.attributes['type'] == "video/mp4") {
+                var src = e.children[0].attributes['src'];
+                widgetList.add(
+                  new NetworkPlayerLifeCycle(
+                    src,
+                    (BuildContext context, VideoPlayerController controller) =>
+                        new AspectRatioVideo(controller),
+                  ),
+                );
+              }
+            } catch (e) {
+              print(e);
+            }
+          });
+        }
+      }
+     } else if (e.nodes.length > 0)
+        e.nodes.forEach((e) => _parseChildren(e, widgetList));
 
-    if (e.nodes.length > 0)
-      e.nodes.forEach((e) => _parseChildren(e, widgetList));
+      
+    }
   }
 
   List<Widget> HParse(String html, String apiKey) {
@@ -133,4 +156,3 @@ class HtmlParser {
     return widgetList;
   }
 }
-
