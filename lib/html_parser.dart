@@ -6,6 +6,7 @@ import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parse;
 import 'package:flutter_html_view/flutter_html_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:video_player/video_player.dart';
 
 class HtmlParser {
   HtmlParser();
@@ -119,11 +120,8 @@ class HtmlParser {
           });
         }
       }
-     } else if (e.nodes.length > 0)
-        e.nodes.forEach((e) => _parseChildren(e, widgetList));
-
-      
-    }
+    } else if (e.nodes.length > 0)
+      e.nodes.forEach((e) => _parseChildren(e, widgetList));
   }
 
   List<Widget> HParse(String html, String apiKey) {
