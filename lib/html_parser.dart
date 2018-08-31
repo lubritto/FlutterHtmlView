@@ -23,8 +23,7 @@ class HtmlParser {
         ],
       );
 
-  _parseChildren(dom.Element e, widgetList) {
-    print(e);
+  _parseChildren(e, widgetList) {
 
     if (e is String || e is dom.Text) {
       String old = e.text;
@@ -49,6 +48,7 @@ class HtmlParser {
         widgetList.add(CachedNetworkImage(
           imageUrl: src,
           fit: BoxFit.cover,
+          placeholder: _buildPlaceholder(),
         ));
       } else if (src.startsWith('data:image')) {
         var exp = RegExp(r'data:.*;base64,');
